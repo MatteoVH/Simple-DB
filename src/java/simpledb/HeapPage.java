@@ -292,11 +292,11 @@ public class HeapPage implements Page {
      */
     public boolean isSlotUsed(int i) {
 		int headerByteIndex = i / 8;
-		int bitIndex = 7 - (i % 8);
+		int bitIndex = i % 8;
 		
-		byte headerByte = header[headerByteIndex];
+		byte headerByte = this.header[headerByteIndex];
 
-		return ((headerByte >> bitIndex) & 1) == 1;
+		return (((headerByte >> bitIndex) & 1) == 1);
     }
 
     /**
