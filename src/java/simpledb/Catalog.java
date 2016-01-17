@@ -18,12 +18,43 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Catalog {
 
+    private class Item {
+        private String name;
+        private String primaryKey;
+        private DbFile file;
+        
+        public Item(String n, String key, DbFile db) {
+            name = n;
+            primaryKey = key;
+            file = db;
+        }
+        
+        public String getName() {
+            return name;
+        }
+        
+        public String getPrimaryKey() {
+            return primaryKey;
+        }
+        
+        public DbFile getFile() {
+            return file;
+        }
+    }
+    
+    private ConcurrentHashMap<Integer, Item> idMap;
+    private ConcurrentHashMap<String, Integer> nameMap;
+    private ArrayList<Integer> idList;
+    
     /**
      * Constructor.
      * Creates a new, empty catalog.
      */
     public Catalog() {
-        // some code goes here
+        // some code goes here - done
+        idMap = new ConcurrentHashMap<Integer, Item>();
+        nameMap = new ConcurrentHashMap<String, Integer>();
+        idList = new ArrayList<Integer>();
     }
 
     /**
@@ -36,7 +67,23 @@ public class Catalog {
      * conflict exists, use the last table to be added as the table for a given name.
      */
     public void addTable(DbFile file, String name, String pkeyField) {
-        // some code goes here
+        // some code goes here - done?
+        if (name == null || file == null || pkeyField == null) {
+            return;
+        }
+        Item i = new Item(name, pkeyField, file);
+        if (idMap.containsKey(name)){
+            idMap.remove(nameMap.get(name));
+            idMap.put(file.getId(), i);
+            idList.remove(nameMap.get(name));
+            idList.add(file.getId());
+            nameMap.replace(name, file.getId());
+        }
+        else {
+            idMap.put(file.getId(), i);
+            nameMap.put(name, file.getId());
+            idList.add(file.getId());
+        }
     }
 
     public void addTable(DbFile file, String name) {
@@ -59,8 +106,12 @@ public class Catalog {
      * @throws NoSuchElementException if the table doesn't exist
      */
     public int getTableId(String name) throws NoSuchElementException {
-        // some code goes here
-        return 0;
+        // some code goes here - done
+        if (name == null)
+            throw new NoSuchElementException();
+        if (nameMap.get(name) != null)
+            return idMap.get(nameMap.get(name)).getFile().getId();
+        throw new NoSuchElementException();
     }
 
     /**
@@ -70,8 +121,11 @@ public class Catalog {
      * @throws NoSuchElementException if the table doesn't exist
      */
     public TupleDesc getTupleDesc(int tableid) throws NoSuchElementException {
-        // some code goes here
-        return null;
+        // some code goes here - done
+        if ( idMap.get(tableid) != null ) {
+            return idMap.get(tableid).getFile().getTupleDesc();
+        }
+        throw new NoSuchElementException();
     }
 
     /**
@@ -81,28 +135,34 @@ public class Catalog {
      *     function passed to addTable
      */
     public DbFile getDatabaseFile(int tableid) throws NoSuchElementException {
-        // some code goes here
-        return null;
+        // some code goes here - done
+        if ( idMap.get(tableid) != null ) {
+            return idMap.get(tableid).getFile();
+        }
+        throw new NoSuchElementException();
     }
 
     public String getPrimaryKey(int tableid) {
-        // some code goes here
-        return null;
+        // some code goes here - done?
+        return idMap.get(tableid).getPrimaryKey();
     }
 
     public Iterator<Integer> tableIdIterator() {
-        // some code goes here
-        return null;
+        // some code goes here - done
+        return idList.iterator();
     }
 
     public String getTableName(int id) {
-        // some code goes here
-        return null;
+        // some code goes here - done?
+        return idMap.get(id).getName();
     }
     
     /** Delete all tables from the catalog */
     public void clear() {
-        // some code goes here
+        // some code goes here - done
+        idMap.clear();
+        nameMap.clear();
+        idList.clear();
     }
     
     /**
