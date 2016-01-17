@@ -26,13 +26,15 @@ public class BufferPool {
     constructor instead. */
     public static final int DEFAULT_PAGES = 50;
 
+	public static Page[] pages;
+
     /**
      * Creates a BufferPool that caches up to numPages pages.
      *
      * @param numPages maximum number of pages in this buffer pool.
      */
     public BufferPool(int numPages) {
-        // some code goes here
+		this.pages = new Page[numPages];
     }
     
     public static int getPageSize() {
@@ -61,8 +63,12 @@ public class BufferPool {
      */
     public  Page getPage(TransactionId tid, PageId pid, Permissions perm)
         throws TransactionAbortedException, DbException {
-        // some code goes here
-        return null;
+		for (Page p : this.pages) {
+			if (p.getId().equals(pid))
+				return p;
+		}
+
+		throw new DbException("Page not in buffer.");
     }
 
     /**
