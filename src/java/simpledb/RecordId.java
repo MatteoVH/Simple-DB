@@ -54,7 +54,7 @@ public class RecordId implements Serializable {
 
 		RecordId other = (RecordId)o;
 
-		if (this.tupleno() != other.tupleno() || this.getPageId() != other.getPageId())
+		if (this.tupleno() != other.tupleno() || !(this.getPageId().equals(other.getPageId())))
 			return false;
 
 		return true;
