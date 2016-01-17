@@ -66,9 +66,7 @@ public class HeapPage implements Page {
         @return the number of tuples on this page
     */
     private int getNumTuples() {        
-        // some code goes here
-        return 0;
-
+		return tuples.length;
     }
 
     /**
@@ -76,10 +74,7 @@ public class HeapPage implements Page {
      * @return the number of bytes in the header of a page in a HeapFile with each tuple occupying tupleSize bytes
      */
     private int getHeaderSize() {        
-        
-        // some code goes here
-        return 0;
-                 
+		return header.length;
     }
     
     /** Return a view of this page before it was modified
@@ -111,8 +106,7 @@ public class HeapPage implements Page {
      * @return the PageId associated with this page.
      */
     public HeapPageId getId() {
-    // some code goes here
-    throw new UnsupportedOperationException("implement this");
+		return this.pid;
     }
 
     /**
@@ -281,17 +275,36 @@ public class HeapPage implements Page {
      * Returns the number of empty slots on this page.
      */
     public int getNumEmptySlots() {
-        // some code goes here
-        return 0;
+		int emptySlots = 0;
+		
+		for (byte b : header) {
+			for (int i = 0; i < 8; i++) {
+				if ((((b >> i) & 1) == 1))
+					emptySlots++;
+			}
+		}
+
+		return emptySlots;
     }
 
     /**
      * Returns true if associated slot on this page is filled.
      */
     public boolean isSlotUsed(int i) {
-        // some code goes here
-        return false;
+		int headerByteIndex = i / 8;
+		int bitIndex = 7 - (i % 8);
+		
+		byte headerByte = header[headerByteIndex];
+
+		return ((headerByte >> bitIndex) & 1) == 1;
     }
+
+    /**
+     * Return the tuple from a specified index
+     */
+	public Tuple getTupleFromSlot(int i) {
+		return this.tuples[i];
+	}
 
     /**
      * Abstraction to fill or clear a slot on this page.
@@ -306,9 +319,36 @@ public class HeapPage implements Page {
      * (note that this iterator shouldn't return tuples in empty slots!)
      */
     public Iterator<Tuple> iterator() {
-        // some code goes here
-        return null;
-    }
+		return (new Iterator<Tuple>() {
+			private int index = 0;
+			
+			public Tuple next() {
+
+				while (index < getNumTuples()) {
+					if (isSlotUsed(index++))
+						return getTupleFromSlot(index - 1);
+				}
+
+				throw new NoSuchElementException();
+			}
+
+			public boolean hasNext() {
+				int tempIndex = index;
+
+				for (tempIndex = index; tempIndex < getNumTuples(); tempIndex++) {
+					if (isSlotUsed(tempIndex))
+						return true;
+				}
+
+				return false;
+			}
+			
+			public void remove() {
+				throw new UnsupportedOperationException();
+			}
+		});
+
+	}
 
 }
 
