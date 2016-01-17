@@ -11,6 +11,12 @@ public class SeqScan implements DbIterator {
 
     private static final long serialVersionUID = 1L;
 
+	private TransactionId transactionId;
+	private int tableId;
+	private String tableAlias;
+
+	private Catalog c = new Catalog();
+
     /**
      * Creates a sequential scan over the specified table as a part of the
      * specified transaction.
@@ -28,7 +34,9 @@ public class SeqScan implements DbIterator {
      *            tableAlias.null, or null.null).
      */
     public SeqScan(TransactionId tid, int tableid, String tableAlias) {
-        // some code goes here
+		this.transactionId = tid;
+		this.tableId = tableid;
+		this.tableAlias = tableAlias;
     }
 
     /**
@@ -37,7 +45,7 @@ public class SeqScan implements DbIterator {
      *       be the actual name of the table in the catalog of the database
      * */
     public String getTableName() {
-        return null;
+        return c.getTableName(this.tableId);
     }
     
     /**
@@ -45,8 +53,7 @@ public class SeqScan implements DbIterator {
      * */
     public String getAlias()
     {
-        // some code goes here
-        return null;
+        return this.tableAlias;
     }
 
     /**
@@ -62,7 +69,8 @@ public class SeqScan implements DbIterator {
      *            tableAlias.null, or null.null).
      */
     public void reset(int tableid, String tableAlias) {
-        // some code goes here
+		this.tableId = tableid;
+		this.tableAlias = tableAlias;
     }
 
     public SeqScan(TransactionId tid, int tableid) {
