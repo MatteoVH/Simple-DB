@@ -63,12 +63,19 @@ public class BufferPool {
      */
     public  Page getPage(TransactionId tid, PageId pid, Permissions perm)
         throws TransactionAbortedException, DbException {
+
 		for (Page p : this.pages) {
-            if (p == null) {
-                p = Database.getCatalog().getDatabaseFile(pid.getTableId()).readPage(pid);
+			if (p == null)
+				continue;
+			if (p.getId().equals(pid))
+				return p;
+		}
+
+		for (int x = 0; x < this.pages.length; x++) {
+            if (pages[x] == null) {
+                pages[x] = Database.getCatalog().getDatabaseFile(pid.getTableId()).readPage(pid);
+				return pages[x];
             }
-            if (p.getId().equals(pid))
-                return p;
 		}
 		throw new DbException("Buffer Pool Full");
     }
