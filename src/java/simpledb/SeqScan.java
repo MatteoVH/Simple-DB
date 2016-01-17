@@ -15,7 +15,13 @@ public class SeqScan implements DbIterator {
 	private int tableId;
 	private String tableAlias;
 
-	private Catalog c = new Catalog();
+	private HeapFile heapFile;
+	
+	private Catalog c;
+
+	private TupleDesc td;
+
+	private DbFileIterator fileIt;
 
     /**
      * Creates a sequential scan over the specified table as a part of the
@@ -37,6 +43,16 @@ public class SeqScan implements DbIterator {
 		this.transactionId = tid;
 		this.tableId = tableid;
 		this.tableAlias = tableAlias;
+		
+		this.c = Database.getCatalog();
+
+		this.td = c.getTupleDesc(tableid);
+
+		this.heapFile = (HeapFile) c.getDatabaseFile(tableid);
+
+		
+
+		this.fileIt = this.heapFile.iterator(tid);
     }
 
     /**
@@ -78,7 +94,7 @@ public class SeqScan implements DbIterator {
     }
 
     public void open() throws DbException, TransactionAbortedException {
-        // some code goes here
+		this.fileIt.open();
     }
 
     /**
@@ -91,27 +107,24 @@ public class SeqScan implements DbIterator {
      *         prefixed with the tableAlias string from the constructor.
      */
     public TupleDesc getTupleDesc() {
-        // some code goes here
-        return null;
+		return this.td;
     }
 
     public boolean hasNext() throws TransactionAbortedException, DbException {
-        // some code goes here
-        return false;
+        return this.fileIt.hasNext();
     }
 
     public Tuple next() throws NoSuchElementException,
             TransactionAbortedException, DbException {
-        // some code goes here
-        return null;
+        return this.fileIt.next();
     }
 
     public void close() {
-        // some code goes here
+		this.fileIt.close();
     }
 
     public void rewind() throws DbException, NoSuchElementException,
             TransactionAbortedException {
-        // some code goes here
+		this.fileIt.rewind();
     }
 }
