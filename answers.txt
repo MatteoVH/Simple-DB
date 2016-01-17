@@ -1,0 +1,15 @@
+1. in instances where we had to handle a collection of objects, we chose to use 
+the Java Standard Library ArrayList implementation, as well as a HashMap in the 
+Catalog. ArrayList comes with many handy methods that were perfect for our uses 
+in the project--especially the concatenation function. 
+2. We added an Iterator auxiliary class to HeapFile to hold the collection of 
+methods required for the HeapFileIterator.
+3. There are no incomplete or missing sections of code apart from those that 
+will be implemented in future projects as dictated by the spec.
+4. We spent 7 hours working on the project. It was hard to discern how to wire 
+together the classes at a higher level when doing the SeqScan class. This was 
+further muddled by all the static functions and classes. Also, Alex has never 
+used Sun™ Java© so this was a fun adventure.
+
+I, Matteo Vesprini-Heidrich (304205341), worked with Alex Waz (504480512) on 
+Lab 1.
