@@ -279,7 +279,7 @@ public class HeapPage implements Page {
 		
 		for (byte b : header) {
 			for (int i = 0; i < 8; i++) {
-				if ((((b >> i) & 1) == 1))
+				if ((((b >> i) & 1) == 0))
 					emptySlots++;
 			}
 		}
