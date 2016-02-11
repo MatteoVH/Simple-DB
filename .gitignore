@@ -1,4 +1,5 @@
 *.swp
 *.class
 *.swo
+*.jar
 dist/
