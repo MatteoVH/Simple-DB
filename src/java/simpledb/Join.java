@@ -12,6 +12,8 @@ public class Join extends Operator {
     private JoinPredicate m_joinPred;
     private DbIterator m_leftItr;
     private DbIterator m_rightItr;
+    private TupleDesc m_lefttd;
+    private TupleDesc m_righttd;
     
     /**
      * Constructor. Accepts to children to join and the predicate to join them
@@ -29,6 +31,8 @@ public class Join extends Operator {
         m_joinPred = p;
         m_leftItr = child1;
         m_rightItr = child2;
+        m_lefttd = null;
+        m_righttd = null;
     }
 
     public JoinPredicate getJoinPredicate() {
@@ -52,7 +56,7 @@ public class Join extends Operator {
      *       alias or table name.
      * */
     public String getJoinField2Name() {
-        // some code goes here
+        // some code goes here - done
         return m_rightItr.getTupleDesc().getFieldName(m_joinPred.getField2());
     }
 
@@ -61,23 +65,29 @@ public class Join extends Operator {
      *      implementation logic.
      */
     public TupleDesc getTupleDesc() {
-        // some code goes here
-        return ;
+        // some code goes here - done?
+        return TupleDesc.merge(m_leftItr.getTupleDesc(), m_rightItr.getTupleDesc());
     }
 
     public void open() throws DbException, NoSuchElementException,
             TransactionAbortedException {
-        // some code goes here
+        // some code goes here - done?
+                m_leftItr.open();
+                m_rightItr.open();
+                super.open();
     }
 
     public void close() {
-        
-        // some code goes here
+        // some code goes here - done?
+        super.close();
+        m_rightItr.close();
+        m_leftItr.close();
     }
 
     public void rewind() throws DbException, TransactionAbortedException {
-        // some code goes here
-        
+        // some code goes here - done?
+        m_leftItr.rewind();
+        m_rightItr.rewind();
     }
 
     /**
@@ -106,12 +116,14 @@ public class Join extends Operator {
     @Override
     public DbIterator[] getChildren() {
         // some code goes here
-        return null;
+        return new DbIterator[] { m_leftItr, m_rightItr };
     }
 
     @Override
     public void setChildren(DbIterator[] children) {
-        // some code goes here
+        // some code goes here - done?
+        m_leftItr = children[0];
+        m_rightItr = children[1];
     }
 
 }
