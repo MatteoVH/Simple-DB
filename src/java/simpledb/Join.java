@@ -8,7 +8,11 @@ import java.util.*;
 public class Join extends Operator {
 
     private static final long serialVersionUID = 1L;
-
+    
+    private JoinPredicate m_joinPred;
+    private DbIterator m_leftItr;
+    private DbIterator m_rightItr;
+    
     /**
      * Constructor. Accepts to children to join and the predicate to join them
      * on
@@ -21,12 +25,15 @@ public class Join extends Operator {
      *            Iterator for the right(inner) relation to join
      */
     public Join(JoinPredicate p, DbIterator child1, DbIterator child2) {
-        // some code goes here
+        // some code goes here - done?
+        m_joinPred = p;
+        m_leftItr = child1;
+        m_rightItr = child2;
     }
 
     public JoinPredicate getJoinPredicate() {
-        // some code goes here
-        return null;
+        // some code goes here - done
+        return m_joinPred;
     }
 
     /**
@@ -35,8 +42,8 @@ public class Join extends Operator {
      *       alias or table name.
      * */
     public String getJoinField1Name() {
-        // some code goes here
-        return null;
+        // some code goes here - done
+        return m_leftItr.getTupleDesc().getFieldName(m_joinPred.getField1());
     }
 
     /**
@@ -46,7 +53,7 @@ public class Join extends Operator {
      * */
     public String getJoinField2Name() {
         // some code goes here
-        return null;
+        return m_rightItr.getTupleDesc().getFieldName(m_joinPred.getField2());
     }
 
     /**
@@ -55,7 +62,7 @@ public class Join extends Operator {
      */
     public TupleDesc getTupleDesc() {
         // some code goes here
-        return null;
+        return ;
     }
 
     public void open() throws DbException, NoSuchElementException,
@@ -64,11 +71,13 @@ public class Join extends Operator {
     }
 
     public void close() {
+        
         // some code goes here
     }
 
     public void rewind() throws DbException, TransactionAbortedException {
         // some code goes here
+        
     }
 
     /**
