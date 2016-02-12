@@ -109,7 +109,39 @@ public class Join extends Operator {
      * @see JoinPredicate#filter
      */
     protected Tuple fetchNext() throws TransactionAbortedException, DbException {
-        // some code goes here
+        // some code goes here - done? jk prob not fml
+        if (m_lefttd == null && m_leftItr.hasNext() == false)
+            return null;
+        
+        while (m_leftItr.hasNext()) {
+            if (m_lefttd == null && m_righttd == null)
+                m_lefttd = m_leftItr.next();
+            while (m_rightItr.hasNext()) {
+                if (m_joinPred.filter(m_lefttd, m_righttd)) { // do the filtered cross product (join)
+                    TupleDesc crosstd = this.getTupleDesc();
+                    Tuple crossTuple = new Tuple(crosstd);
+                    for (int i = 0; i < m_leftItr.getTupleDesc().numFields(); i++)
+                        crossTuple.setField(i, m_leftItr.getField());
+                    for (int i = 0; i < m_rightItr.getTupleDesc().numFields(); i++)
+                        crossTuple.setField(i + m_leftItr.getTupleDesc().numFields(), m_rightItr.getField());
+                    return crossTuple;
+                }
+                m_rightItr.rewind();
+                m_lefttd = m_leftItr.next();
+            }
+        }
+        while (m_rightItr.hasNext()) {
+            if (m_joinPred.filter(m_lefttd, m_righttd)) { // do the filtered cross product (join)
+                TupleDesc crosstd = this.getTupleDesc();
+                Tuple crossTuple = new Tuple(crosstd);
+                for (int i = 0; i < m_leftItr.getTupleDesc().numFields(); i++)
+                    crossTuple.setField(i, m_leftItr.getField());
+                for (int i = 0; i < m_rightItr.getTupleDesc().numFields(); i++)
+                    crossTuple.setField(i + m_leftItr.getTupleDesc().numFields(), m_rightItr.getField());
+                return crossTuple;
+            }
+        }
+        
         return null;
     }
 
