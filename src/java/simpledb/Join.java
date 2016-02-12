@@ -12,8 +12,8 @@ public class Join extends Operator {
     private JoinPredicate m_joinPred;
     private DbIterator m_leftItr;
     private DbIterator m_rightItr;
-    private TupleDesc m_lefttd;
-    private TupleDesc m_righttd;
+    private Tuple m_lefttd;
+    private Tuple m_righttd;
     
     /**
      * Constructor. Accepts to children to join and the predicate to join them
@@ -69,12 +69,11 @@ public class Join extends Operator {
         return TupleDesc.merge(m_leftItr.getTupleDesc(), m_rightItr.getTupleDesc());
     }
 
-    public void open() throws DbException, NoSuchElementException,
-            TransactionAbortedException {
+    public void open() throws DbException, NoSuchElementException, TransactionAbortedException {
         // some code goes here - done?
-                m_leftItr.open();
-                m_rightItr.open();
-                super.open();
+        m_leftItr.open();
+        m_rightItr.open();
+        super.open();
     }
 
     public void close() {
@@ -121,27 +120,26 @@ public class Join extends Operator {
                     TupleDesc crosstd = this.getTupleDesc();
                     Tuple crossTuple = new Tuple(crosstd);
                     for (int i = 0; i < m_leftItr.getTupleDesc().numFields(); i++)
-                        crossTuple.setField(i, m_leftItr.getField());
+                        crossTuple.setField(i, m_lefttd.getField(i));
                     for (int i = 0; i < m_rightItr.getTupleDesc().numFields(); i++)
-                        crossTuple.setField(i + m_leftItr.getTupleDesc().numFields(), m_rightItr.getField());
+                        crossTuple.setField(i + m_leftItr.getTupleDesc().numFields(), m_righttd.getField(i));
                     return crossTuple;
                 }
-                m_rightItr.rewind();
-                m_lefttd = m_leftItr.next();
             }
+            m_rightItr.rewind();
+            m_lefttd = m_leftItr.next();
         }
         while (m_rightItr.hasNext()) {
-            if (m_joinPred.filter(m_lefttd, m_righttd)) { // do the filtered cross product (join)
+            if (m_joinPred.filter(m_lefttd, m_righttd)) {
                 TupleDesc crosstd = this.getTupleDesc();
                 Tuple crossTuple = new Tuple(crosstd);
                 for (int i = 0; i < m_leftItr.getTupleDesc().numFields(); i++)
-                    crossTuple.setField(i, m_leftItr.getField());
+                    crossTuple.setField(i, m_lefttd.getField(i));
                 for (int i = 0; i < m_rightItr.getTupleDesc().numFields(); i++)
-                    crossTuple.setField(i + m_leftItr.getTupleDesc().numFields(), m_rightItr.getField());
+                    crossTuple.setField(i + m_leftItr.getTupleDesc().numFields(), m_righttd.getField(i));
                 return crossTuple;
             }
         }
-        
         return null;
     }
 
