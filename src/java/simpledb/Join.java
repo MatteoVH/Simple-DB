@@ -74,6 +74,8 @@ public class Join extends Operator {
         m_leftItr.open();
         m_rightItr.open();
         super.open();
+        m_lefttd = null;
+        m_righttd = null;
     }
 
     public void close() {
@@ -87,6 +89,8 @@ public class Join extends Operator {
         // some code goes here - done?
         m_leftItr.rewind();
         m_rightItr.rewind();
+        m_lefttd = null;
+        m_righttd = null;
     }
 
     /**
@@ -109,35 +113,51 @@ public class Join extends Operator {
      */
     protected Tuple fetchNext() throws TransactionAbortedException, DbException {
         // some code goes here - done? jk prob not fml
-        if (m_lefttd == null && m_leftItr.hasNext() == false)
-            return null;
-        
-        while (m_leftItr.hasNext()) {
-            if (m_lefttd == null && m_righttd == null)
+        Tuple crosstd = null;
+        if (m_lefttd == null){
+            if (m_leftItr.hasNext())
                 m_lefttd = m_leftItr.next();
-            while (m_rightItr.hasNext()) {
-                if (m_joinPred.filter(m_lefttd, m_righttd)) { // do the filtered cross product (join)
-                    TupleDesc crosstd = this.getTupleDesc();
-                    Tuple crossTuple = new Tuple(crosstd);
-                    for (int i = 0; i < m_leftItr.getTupleDesc().numFields(); i++)
-                        crossTuple.setField(i, m_lefttd.getField(i));
-                    for (int i = 0; i < m_rightItr.getTupleDesc().numFields(); i++)
-                        crossTuple.setField(i + m_leftItr.getTupleDesc().numFields(), m_righttd.getField(i));
-                    return crossTuple;
-                }
-            }
-            m_rightItr.rewind();
-            m_lefttd = m_leftItr.next();
+            else
+                return null;
         }
-        while (m_rightItr.hasNext()) {
+        while(m_rightItr.hasNext()) { // find cross product of correct joins
+            m_righttd = m_rightItr.next();
             if (m_joinPred.filter(m_lefttd, m_righttd)) {
-                TupleDesc crosstd = this.getTupleDesc();
-                Tuple crossTuple = new Tuple(crosstd);
-                for (int i = 0; i < m_leftItr.getTupleDesc().numFields(); i++)
-                    crossTuple.setField(i, m_lefttd.getField(i));
-                for (int i = 0; i < m_rightItr.getTupleDesc().numFields(); i++)
-                    crossTuple.setField(i + m_leftItr.getTupleDesc().numFields(), m_righttd.getField(i));
-                return crossTuple;
+                crosstd = new Tuple(TupleDesc.merge(m_leftItr.getTupleDesc(), m_rightItr.getTupleDesc()));
+                Iterator<Field> leftFieldItr = m_lefttd.fields();
+                Iterator<Field> rightFieldItr = m_righttd.fields();
+                int i = 0;
+                while (leftFieldItr.hasNext()) {
+                    crosstd.setField(i, leftFieldItr.next());
+                    i++;
+                }
+                while (rightFieldItr.hasNext()) {
+                    crosstd.setField(i, rightFieldItr.next());
+                    i++;
+                }
+                return crosstd;
+            }
+        }
+        while(m_leftItr.hasNext()) {
+            m_lefttd  = m_leftItr.next();
+            m_rightItr.rewind();
+            while(m_rightItr.hasNext()) {
+                m_righttd = m_rightItr.next();
+                if (m_joinPred.filter(m_lefttd, m_righttd)) {
+                    crosstd = new Tuple(TupleDesc.merge(m_leftItr.getTupleDesc(), m_rightItr.getTupleDesc()));
+                    Iterator<Field> leftFieldItr = m_lefttd.fields();
+                    Iterator<Field> rightFieldItr = m_righttd.fields();
+                    int i = 0;
+                    while (leftFieldItr.hasNext()) {
+                        crosstd.setField(i, leftFieldItr.next());
+                        i++;
+                    }
+                    while (rightFieldItr.hasNext()) {
+                        crosstd.setField(i, rightFieldItr.next());
+                        i++;
+                    }
+                    return crosstd;
+                }
             }
         }
         return null;
