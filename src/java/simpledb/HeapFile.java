@@ -89,8 +89,15 @@ public class HeapFile implements DbFile {
 
     // see DbFile.java for javadocs
     public void writePage(Page page) throws IOException {
-        // some code goes here
-        // not necessary for lab1 - nice
+        // some code goes here -d
+        // not necessary for lab1 - nice - damn
+        RandomAccessFile randomAccess = new RandomAccessFile(file, "rw");
+        int offset = page.getId().pageNumber() * 4096;
+        byte[] pageData = page.getPageData();
+        randomAccess.seek(offset);
+        randomAccess.write(pageData);
+        
+        page.markDirty(false, null);
     }
 
     /**
@@ -104,17 +111,45 @@ public class HeapFile implements DbFile {
     // see DbFile.java for javadocs
     public ArrayList<Page> insertTuple(TransactionId tid, Tuple t)
             throws DbException, IOException, TransactionAbortedException {
-        // some code goes here
-        return null;
+        // some code goes here - ?
         // not necessary for lab1 - nice
+                ArrayList<Page> pagesList = new ArrayList<Page>();
+                HeapPageId pageid;
+                HeapPage page;
+                for (int i = 0; i < numPages(); i++) { // find empty slot
+                    pageid = new HeapPageId(getId(), i);
+                    page = (HeapPage)Database.getBufferPool().getPage(tid, pageid, Permissions.READ_WRITE);
+                    if (page.getNumEmptySlots() > 0) {
+                        page.insertTuple(t);
+                        page.markDirty(true, tid);
+                        pagesList.add(page);
+                        return pagesList;
+                    }
+                }
+                pageid = new HeapPageId(getId(), numPages());
+                page = new HeapPage(pageid, HeapPage.createEmptyPageData());
+                writePage(page); // no empty slots found
+                page = (HeapPage)Database.getBufferPool().getPage(tid, pageid, Permissions.READ_WRITE);
+                page.insertTuple(t);
+                pagesList.add(page);
+                return pagesList;
     }
 
     // see DbFile.java for javadocs
     public ArrayList<Page> deleteTuple(TransactionId tid, Tuple t) throws DbException,
             TransactionAbortedException {
         // some code goes here
-        return null;
         // not necessary for lab1 - nice
+                ArrayList<Page> deleteList = new ArrayList<Page>();
+                if (t.getRecordId() != null && t.getRecordId().getPageId().getTableId() == getId()) {
+                    HeapPage page = (HeapPage)Database.getBufferPool().getPage(tid, t.getRecordId().getPageId(), Permissions.READ_WRITE);
+                    page.deleteTuple(t);
+                    page.markDirty(true, tid);
+                    deleteList.add(page);
+                    return deleteList;
+                }
+                
+                throw new DbException("tuple cannot be deleted");
     }
 
     // see DbFile.java for javadocs
