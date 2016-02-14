@@ -8,6 +8,11 @@ public class Insert extends Operator {
 
     private static final long serialVersionUID = 1L;
 
+	private TransactionId t;
+	private DbIterator child;
+	private int tableid;
+	private TupleDesc tupleDesc;
+
     /**
      * Constructor.
      * 
@@ -23,24 +28,29 @@ public class Insert extends Operator {
      */
     public Insert(TransactionId t,DbIterator child, int tableid)
             throws DbException {
-        // some code goes here
+		this.t = t;
+		this.child = child;
+		this.tableid = tableid;
+
+		this.tupleDesc = child.getTupleDesc();
     }
 
     public TupleDesc getTupleDesc() {
-        // some code goes here
-        return null;
+		return this.tupleDesc;
     }
 
     public void open() throws DbException, TransactionAbortedException {
-        // some code goes here
+		child.open();
+		super.open();
     }
 
     public void close() {
-        // some code goes here
+		super.close();
+		child.close();
     }
 
     public void rewind() throws DbException, TransactionAbortedException {
-        // some code goes here
+		child.rewind();
     }
 
     /**
@@ -57,18 +67,17 @@ public class Insert extends Operator {
      * @see BufferPool#insertTuple
      */
     protected Tuple fetchNext() throws TransactionAbortedException, DbException {
-        // some code goes here
         return null;
     }
 
     @Override
     public DbIterator[] getChildren() {
-        // some code goes here
-        return null;
+		return new DbIterator[] { this.child };
     }
 
     @Override
     public void setChildren(DbIterator[] children) {
-        // some code goes here
+        if (this.child != children[0])
+			this.child = children[0];
     }
 }
