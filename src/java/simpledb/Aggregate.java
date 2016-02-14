@@ -159,8 +159,13 @@ public class Aggregate extends Operator {
         TupleDesc td = null;
         Type [] types;
         String [] fields;
-        String aggrName = m_aop.toString() + "(" + m_child.getTupleDesc().getFieldName(aggregateField()) + ")";
+        String aggrName = m_child.getTupleDesc().getFieldName(aggregateField());
         if (groupField() == Aggregator.NO_GROUPING) {
+            types = new Type[] { m_child.getTupleDesc().getFieldType(aggregateField()) };
+            fields = new String[] { aggrName };
+            td = new TupleDesc(types, fields);
+        }
+        else {
             types = new Type[] {
                 m_child.getTupleDesc().getFieldType(groupField()),
                 m_child.getTupleDesc().getFieldType(aggregateField())
