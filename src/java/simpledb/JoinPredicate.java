@@ -43,7 +43,7 @@ public class JoinPredicate implements Serializable {
      */
     public boolean filter(Tuple t1, Tuple t2) {
         // some code goes here - done
-        return t1.getField(getField1()).compare(m_op, t2.getField(getField2()));
+        return t1.getField(m_field1).compare(m_op, t2.getField(m_field2));
     }
     
     public int getField1()
