@@ -63,7 +63,6 @@ public class Aggregate extends Operator {
      *         {@link simpledb.Aggregator#NO_GROUPING}
      * */
     public int groupField() {
-	// some code goes here - done
         return m_gfield;
     }
 
@@ -73,7 +72,6 @@ public class Aggregate extends Operator {
      *         null;
      * */
     public String groupFieldName() {
-	// some code goes here - dddddone
         if (m_gfield == Aggregator.NO_GROUPING)
             return null;
         else
@@ -84,7 +82,6 @@ public class Aggregate extends Operator {
      * @return the aggregate field
      * */
     public int aggregateField() {
-	// some code goes here -d
         return m_afield;
     }
 
@@ -93,7 +90,6 @@ public class Aggregate extends Operator {
      *         tuples
      * */
     public String aggregateFieldName() {
-	// some code goes here - done?
         return m_child.getTupleDesc().getFieldName(m_afield);
     }
 
@@ -101,7 +97,6 @@ public class Aggregate extends Operator {
      * @return return the aggregate operator
      * */
     public Aggregator.Op aggregateOp() {
-	// some code goes here - don
         return m_aop;
     }
 
@@ -111,7 +106,6 @@ public class Aggregate extends Operator {
 
     public void open() throws NoSuchElementException, DbException,
 	    TransactionAbortedException {
-	// some code goes here
             m_child.open();
             super.open();
             while (m_child.hasNext()) {
@@ -129,7 +123,6 @@ public class Aggregate extends Operator {
      * aggregate. Should return null if there are no more tuples.
      */
     protected Tuple fetchNext() throws TransactionAbortedException, DbException {
-	// some code goes here -dn
         if (m_childr == null)
             throw new DbException("null");
         if (m_childr.hasNext())
@@ -138,7 +131,6 @@ public class Aggregate extends Operator {
     }
 
     public void rewind() throws DbException, TransactionAbortedException {
-	// some code goes hered
         m_child.rewind();
         m_childr.rewind();
     }
@@ -155,7 +147,6 @@ public class Aggregate extends Operator {
      * iterator.
      */
     public TupleDesc getTupleDesc() {
-	// some code goes here - ??? LOL
         TupleDesc td = null;
         Type [] types;
         String [] fields;
@@ -177,7 +168,6 @@ public class Aggregate extends Operator {
     }
 
     public void close() {
-	// some code goes here-d
         m_childr.close();
         m_child.close();
         super.close();
@@ -185,7 +175,6 @@ public class Aggregate extends Operator {
 
     @Override
     public DbIterator[] getChildren() {
-	// some code goes here-d
         if (m_child == null)
             return null;
         else
@@ -194,8 +183,8 @@ public class Aggregate extends Operator {
 
     @Override
     public void setChildren(DbIterator[] children) {
-	// some code goes here-d
-        m_child = children[0];
+		if (m_child != children[0])
+			m_child = children[0];
     }
     
 }
