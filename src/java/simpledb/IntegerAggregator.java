@@ -13,10 +13,10 @@ public class IntegerAggregator implements Aggregator {
 	private Type gbfieldtype;
 	private int afield;
 	private Op what;
-	private int numberOfFieldsAveraged;
 
 	private TupleDesc aggTupleDesc;
 	private ArrayList<Tuple> tuplelist;
+	private ArrayList<Integer> numbersAveragedList;
 
     /**
      * Aggregate constructor
@@ -41,9 +41,9 @@ public class IntegerAggregator implements Aggregator {
 		this.afield = afield;
 		this.what = what;
 
-		this.numberOfFieldsAveraged = 0;
+		this.numbersAveragedList = new ArrayList<Integer>();
 		
-		tuplelist = new ArrayList<Tuple>();
+		this.tuplelist = new ArrayList<Tuple>();
 
     }
 
@@ -56,10 +56,10 @@ public class IntegerAggregator implements Aggregator {
      */
     public void mergeTupleIntoGroup(Tuple tup) {
 		
-		boolean grouping = false;
+		boolean grouping = true;
 
-		if (gbfield != NO_GROUPING)
-			grouping = true;
+		if (gbfield == -1)
+			grouping = false;
 
 		int aggValueIndex = 0;
 
@@ -91,7 +91,7 @@ public class IntegerAggregator implements Aggregator {
 					aggTuple.setField(aggValueIndex, new IntField(1));
 					break;
 				case AVG:
-					numberOfFieldsAveraged = 1;
+					numbersAveragedList.add(1);
 				case MIN: 
 				case MAX:
 				case SUM:
@@ -107,10 +107,13 @@ public class IntegerAggregator implements Aggregator {
 
 			Tuple tupleToManipulate = null;
 
+			int index = 0;
+
 			if (grouping) {
 				boolean tupleFound = false;
 
-				for (Tuple curTuple : tuplelist) {
+				for (index = 0; index < tuplelist.size(); index++) {
+					Tuple curTuple = tuplelist.get(index);
 					if (tup.getField(gbfield).compare(Predicate.Op.EQUALS, curTuple.getField(0))) {
 						tupleToManipulate = curTuple;
 						tupleFound = true;
@@ -127,7 +130,7 @@ public class IntegerAggregator implements Aggregator {
 							aggTuple.setField(aggValueIndex, new IntField(1));
 							break;
 						case AVG:
-							numberOfFieldsAveraged = 1;
+							numbersAveragedList.add(1);
 						case MIN: 
 						case MAX:
 						case SUM:
@@ -173,11 +176,11 @@ public class IntegerAggregator implements Aggregator {
 					tupleToManipulate.setField(
 						aggValueIndex,
 						new IntField(
-							(aggTupAggField.getValue() * numberOfFieldsAveraged +
-							otherTupAggField.getValue()) / (numberOfFieldsAveraged + 1)
+							(aggTupAggField.getValue() * numbersAveragedList.get(index) +
+							otherTupAggField.getValue()) / (numbersAveragedList.get(index) + 1)
 						)
 					);
-					numberOfFieldsAveraged++;
+					numbersAveragedList.set(index, numbersAveragedList.get(index) + 1);
 					break;
 				case COUNT: 
 					tupleToManipulate.setField(aggValueIndex, 
